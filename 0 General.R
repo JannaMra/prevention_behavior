@@ -57,26 +57,19 @@ library(tidyverse)
 
 
 # Paths -------------------------------------------------------------------
-path = "C:/Users/jat41gk/Documents/Projekte/Prevention behavior/Auswertung/" #@work
+getwd()
+#setwd("C:/Users/jat41gk/Documents/Projekte/Prevention behavior/prevention_behavior/")
+setwd('..')
+path = getwd() %>% paste0("/")
+  #"C:/Users/jat41gk/Documents/Projekte/Prevention behavior/Auswertung/" #@work
 
 #load behavioral data (logs)
 path.eye = "Data/Eyelink/reports/" %>% paste0(path, .) #eye tracking data
 #path.trigger = "Data/Tobii/trigger/" %>% paste0(path, .) #get condition 
-
-#path2 = "C:/Users/jat41gk/Documents/Projekte/Threat Brain Oscillations/Threat Oscillations/"
-
-# path.rois = "Analyse/" %>% paste0(path2, .)
-#path.rds = "Analyse/" %>% paste0(path2, .)
 path.prot = "Analyse/prot/" %>% paste0(path, .)
 
-#path.phys = "physio/" %>% paste0(path, .)
-
-#path.rpeaks = "rpeaks/" %>% paste0(path.phys, .)
-#path.rpeaks.postfix = "_rpeaks.csv"
 
 # Files -------------------------------------------------------------------
-#files.rating = list.files(path.ratings, pattern=paste0("^", files.rating.prefix, ".*", files.rating.extension, "$"), full.names=TRUE)
-#files.phys = list.files(path.phys, pattern=".*.txt") #load physiology
 files.eye = list.files(path.eye, pattern=".*.txt")
 #files.trigger = list.files(path.trigger, pattern=".*.dat")
 
