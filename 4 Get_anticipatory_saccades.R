@@ -1,0 +1,109 @@
+############################################################################
+# Prevention Behavior project
+# 
+# 
+
+# Get Onset Picture/no picture
+
+# Determine which subjects should be analyzed
+vpn = fixa$vp %>% 
+  unique() %>% sort() %>% as.character() #all subjects in fixations
+vpn.n = length(vpn)
+vpn = vpn[vpn %in% exclusions == F] #minus a priori exclusions
+#vpn <-  vpn[!(vpn %in% eye.invalid.bl)]
+vpn.n = length(vpn)
+vps=vpn
+
+onset <- data.frame()
+
+for (vpn in vps) {
+  
+  vpcode <- vpn
+  code <- vpn
+  print(code)
+  ntrial <- 200
+  
+  # Loop over trials to determine trial-by-trial baselines
+  for (trial in 1:ntrial) {
+    #trial = 1
+    
+    # # Select trial data
+    # fixblock <- fixa[
+    #   tolower(fixa$vp)==code & #tolower = translates characters in character vectors
+    #     fixa$trial==trial,]
+    msgblock <- msg [
+      tolower(msg$vp)==code &
+        msg$trial==trial,]
+    
+    # Filter 
+    msgblock <- msgblock %>%
+      filter(message == paste(seqdat$pic[trial],".jpg",sep=""))  
+    
+    # Check if correct Stimulus marker is present in MSG file
+    if (msgblock$message!=paste(seqdat$pic[trial],
+                                ".jpg",sep="")) {
+      print(paste("Stimulus error: Trial:",trial," Event:",msgblock$message,sep=""))
+    }
+    
+    # write dataframe with onsets
+    onset <- bind_rows(onset,msgblock)
+  }
+}
+
+onset$onset <- onset$time-600
+antsacc <- data.frame()
+
+for (vpn in vps) {
+  
+  vpcode <- vpn
+  code <- vpn
+  print(code)
+  ntrial <- 200
+
+  
+  # Loop over trials to determine trial-by-trial baselines
+  for (trial in 1:ntrial) {
+    #trial = 1
+    
+    # Select trial data
+    saccblock <- sacc[
+      tolower(sacc$vp)==code & #tolower = translates characters in character vectors
+        sacc$trial==trial,]
+    onsetblock <- onset[
+      tolower(onset$vp)==code & #tolower = translates characters in character vectors
+      onset$trial==trial,]
+    
+    # Filter
+    saccblock <- saccblock %>%
+      filter(timest >= onsetblock$onset & timeend <= onsetblock$time)
+    
+    # write dataframe with anticipatory saccades
+    antsacc <- bind_rows(antsacc,saccblock)
+  }
+}
+
+protsacc <- merge(seqdat, antsacc, by = c("vp", "trial"))
+protsacc <- protsacc %>%
+  arrange(trial)
+
+firstprotsacc <- protsacc %>%
+  group_by(trial)%>%
+  filter(row_number()==1)%>%
+  ungroup()
+
+firstprotsacc %>%
+  summarize(
+    percent_missing = length(trial)/(vpn.n*200)
+  ) 
+ 
+firstprotsacc %>%
+  group_by(valence, operant) %>%
+  summarize(
+    start_y = mean(yst),
+    end_y = mean(yend),
+    percent_missing = length(trial)/(vpn.n*50)
+  )
+
+  
+
+
