@@ -4,12 +4,12 @@
 # 
 
 library(tidyverse)
-path.log <- "Data/log/MainExperiment/" %>% paste0(path, .) 
+path.log <- "Data/log/" %>% paste0(path, .) 
 path.seq <- "Data/sequences/" %>% paste0(path, .) 
-savepath <- "Analyse/prot/" %>% paste0(path, .)  
+savepath <- "Data/Analyse/prot/" %>% paste0(path, .)  
 
 
-vpn <- paste("vp",ifelse(1:2<10,"0",""),1:2,sep="")
+vpn <- paste("vp",ifelse(4:34<10,"0",""),4:34,sep="")
 #vpn <- "vp01"
 # Exclusions:
 #vpn <- vpn[!(vpn %in% c(e.g.,"vpbs01"))]
