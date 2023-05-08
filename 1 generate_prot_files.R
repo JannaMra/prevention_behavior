@@ -10,6 +10,7 @@ savepath <- "Data/Analyse/prot/" %>% paste0(path, .)
 
 
 vpn <- paste("vp",ifelse(4:34<10,"0",""),4:34,sep="")
+#vpn <- "vp04"
 #vpn <- "vp01"
 # Exclusions:
 #vpn <- vpn[!(vpn %in% c(e.g.,"vpbs01"))]
@@ -20,6 +21,7 @@ vpn <- paste("vp",ifelse(4:34<10,"0",""),4:34,sep="")
 # [7] "Uncertainty"   "Duration"      "Uncertainty.1"
 #[10] "ReqTime"       "ReqDur"  
 
+responses.summary <- data.frame()
 
 for (vp in vpn) {
   print(vp)
@@ -39,34 +41,35 @@ for (vp in vpn) {
   logdat1  <- read.table(file=paste(path.log,vp,"_1-PreventionBehavior.log",sep=""), 
                         sep="\t", skip = 4, header=FALSE,fill=TRUE)
   logdat2  <- read.table(file=paste(path.log,vp,"_2-PreventionBehavior.log",sep=""), 
-                         sep="\t", skip = 4, header=FALSE,fill=TRUE)
+                         sep="\t", skip = 8, header=FALSE,fill=TRUE)     # skip 8, so that "responses" are not counted as responses to cue
   logdat <- bind_rows(logdat1, logdat2)
   header.logdat[3]<- "Event.Type"
   colnames( logdat ) <- unlist(header.logdat)
   
   aktstim <- 1
+  #aktstim <- 3
   i <- 1
   
   while (i < nrow(logdat)) {
     
     
-    #nimm pro reihe des log files nur die, in denen ein jpg zu finden ist
-    if (as.character(logdat$Code[i])==paste(seqdat$pic[aktstim],".jpg",sep="")) {
+    #nimm pro reihe des log files nur die, in denen ein Cue zu finden ist
+    if (as.character(logdat$Code[i])=="cue") {
       
       
       # Find next stimulus
-      j <- i
+      j <- i + 1
       
       
-      #wenn kein jpg, geh eine Reihe Weiter
-      while ((j < nrow(logdat)) & (as.character(logdat$Code[j])!=paste(seqdat$pic[aktstim+1],".jpg",sep=""))) {
+      #wenn kein Cue, geh eine Reihe Weiter
+      while ((j < nrow(logdat)) & (as.character(logdat$Code[j])!="cue")) {
         
         j <- j + 1
       }
       
       
-      #eine reihe vor jpg bis zwei reihen vor n?chstem jpg ist ein Stimblock
-      stimblock <- logdat[(i-1):(j-2),] 
+      #eine reihe vor jpg bis zwei reihen vor nächstem jpg ist ein Stimblock
+      stimblock <- logdat[(i):(j-1),] 
       
       
       # Condition korrekt 
@@ -74,24 +77,24 @@ for (vp in vpn) {
       #  print("Wrong condition")
       #}
       
+      # Response in active Trial?
+      seqdat$response[aktstim] <- sum(stimblock$Event.Type=="Response") #wenn Reaktion erfolgt ist, dann 1 in Spalte eintragen
       
-      # Shock given?
-      #seqdat$shock[aktstim] <- sum(stimblock$Code=="shock1") #wenn in einem stim-block ein shock1 enthalten ist, 1 in prot eintragen, da schock erfolgt
-      
-      
-      # flight trials
+      # response time in trials
       # erstmal flight trials suchen
-      flight_markers <- which(stimblock$Event.Type=="Response") 
+      active_markers <- which(stimblock$Event.Type=="Response")
+
+      ifelse(length(active_markers)>0, seqdat$rt[aktstim] <- stimblock$TTime[active_markers]/10, seqdat$rt[aktstim] <- NA)
       
-      if (length(flight_markers)>0) {
-        #druck die TTime in die entsprechende Zeile der seqdat
-        seqdat$rt[aktstim] <- stimblock$TTime[flight_markers]/10
-      }
-      
-      if (seqdat$cue[aktstim] > 0) {
-        #only reaction times in flight phase are documented in prot-file
-        seqdat$rt[aktstim] = NA
-      }
+      # if (length(active_markers)>0) {
+      #   #druck die TTime in die entsprechende Zeile der seqdat
+      #   seqdat$rt[aktstim] <- stimblock$TTime[active_markers]/10
+      # }
+
+      #if (seqdat$cue[aktstim] > 0) {
+      #   #only reaction times in flight phase are documented in prot-file
+      #   seqdat$rt[aktstim] = NA
+      # }
         
       aktstim <- aktstim+1
     }
@@ -101,12 +104,32 @@ for (vp in vpn) {
   write.csv2(seqdat,paste(savepath,vp,".csv",sep=""),row.names=FALSE,quote=FALSE)
   
   # Testberechnungen
-  print(table(seqdat$cue,seqdat$shock))
+  #print(table(seqdat$operant,seqdat$response))
   # Anzahl Trials mit fehlerhaften Reaktionen
-  print(paste0("Erroneous responses: ",sum(seqdat$resp==0,na.rm=TRUE)))
-  # Anzahl Flight-Trials mit zu fruehen Reaktionen
-  print(paste0("Premature flight responses: ",sum(seqdat$resp==2 & seqdat$rt<0,na.rm=TRUE)))
+  print(paste0("No responses in active prevention trials: ",sum(seqdat$operant==1 & seqdat$valence==0 & seqdat$response==0)))
+  print(paste0("No responses in active creation trials: ",sum(seqdat$operant==1 & seqdat$valence==1 & seqdat$response==0)))
+  print(paste0("Response in passive trials: ",sum(seqdat$operant==0 & seqdat$response==1)))
+  seqdat <- seqdat %>% 
+    mutate(problem = case_when(
+      operant==1 & response==0 | operant==0 & response==1 ~ 1,
+      operant==1 & response==1 | operant==0 & response==0 ~ 0)
+      )
+  
+  missing.prevention <- sum(seqdat$operant==1 & seqdat$valence==0 & seqdat$response==0)
+  missing.creation <- sum(seqdat$operant==1 & seqdat$valence==1 & seqdat$response==0)
+  reaction.passive <- sum(seqdat$operant==0 & seqdat$response==1)
+  summary.vp <- data.frame(vp, missing.prevention, missing.creation,reaction.passive)
+  responses.summary <- bind_rows(responses.summary, summary.vp)
 }
+
+# list of exclusions
+print(exclusion.responses <- responses.summary %>% filter(missing.prevention/50 > 0.5 | missing.creation/50 > 0.5) %>% .$vp %>% unique())
+
+
+
+
+
+
 
 ### nochmal zum Laufen bringen für incorrect und premature responses 
 
