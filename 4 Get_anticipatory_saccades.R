@@ -25,6 +25,7 @@ onset <- data.frame()
 
 for (vpn in vps) {
   
+  #vpn = "vp05"
   vpcode <- vpn
   code <- vpn
   print(code)
@@ -35,7 +36,7 @@ for (vpn in vps) {
   for (trial in 1:ntrial) {
     #trial = 1
     
-    # # Select trial data
+    # Select trial data
     # fixblock <- fixa[
     #   tolower(fixa$vp)==code & #tolower = translates characters in character vectors
     #     fixa$trial==trial,]
@@ -58,11 +59,13 @@ for (vpn in vps) {
   }
 }
 
-onset$onset <- onset$time-600
+onset$preonset <- onset$time-600
 antsacc <- data.frame()
+seqdatall <- data.frame()
 
 for (vpn in vps) {
   
+  #vpn = "vp05"
   vpcode <- vpn
   code <- vpn
   print(code)
@@ -83,25 +86,29 @@ for (vpn in vps) {
     
     # Filter
     saccblock <- saccblock %>%
-      filter(timest >= onsetblock$onset & timeend <= onsetblock$time)
+      filter(timest >= onsetblock$preonset & timeend <= onsetblock$time)
     
     # write dataframe with anticipatory saccades
     antsacc <- bind_rows(antsacc,saccblock)
   }
+  # Comine with trial-info
+  seqdat <- read.csv2(paste("Data/Analyse/prot/",vpn,".csv",sep=""))
+  seqdatall <- bind_rows(seqdatall,seqdat)
+  protsacc <- merge(seqdatall, antsacc, by = c("vp", "trial"))
 }
 
-protsacc <- merge(seqdat, antsacc, by = c("vp", "trial"))
 protsacc <- protsacc %>%
-  arrange(trial)
+  arrange(vp, trial)
 
+# use only first saccade
 firstprotsacc <- protsacc %>%
-  group_by(trial)%>%
+  group_by(vp, trial)%>%
   filter(row_number()==1)%>%
   ungroup()
 
 firstprotsacc %>%
   summarize(
-    percent_missing = length(trial)/(vpn.n*200)
+    percent_missing = 1-(length(firstprotsacc$trial)/(vpn.n*200))
   ) 
  
 firstprotsacc %>%
@@ -109,9 +116,30 @@ firstprotsacc %>%
   summarize(
     start_y = mean(yst),
     end_y = mean(yend),
-    percent_missing = length(trial)/(vpn.n*50)
+    percent_missing = 1-(length(trial)/(vpn.n*50))
   )
 
+# Abhängig von Reaktion/keiner Reaktion 
+
+firstprotsacc %>%
+  filter(operant == 1) %>%
+  filter(response == 1) %>%
+  group_by(valence) %>%
+  summarize(
+    start_y = mean(yst),
+    end_y = mean(yend),
+    percent_missing = 1-(length(trial)/(vpn.n*50))
+  )
+
+firstprotsacc %>%
+  filter(operant == 0) %>%
+  filter(response == 0) %>%
+  group_by(valence) %>%
+  summarize(
+    start_y = mean(yst),
+    end_y = mean(yend),
+    percent_missing = 1-(length(trial)/(vpn.n*50))
+  )
   
 
 
