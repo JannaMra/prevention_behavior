@@ -5,12 +5,19 @@
 
 # Get Onset Picture/no picture
 
+# Onsets laden
+msg <- read.csv2(paste0(path,"Data/Eyelink/msg.csv"), row.names = 1)
+fixa <- read.csv2(paste0(path,"Data/Eyelink/fixa.csv"), row.names = 1)
+sac <- read.csv2(paste0(path,"Data/Eyelink/sacc.csv"), row.names = 1)
+
 # Determine which subjects should be analyzed
 vpn = fixa$vp %>% 
   unique() %>% sort() %>% as.character() #all subjects in fixations
 vpn.n = length(vpn)
 vpn = vpn[vpn %in% exclusions == F] #minus a priori exclusions
-#vpn <-  vpn[!(vpn %in% eye.invalid.bl)]
+vpn <-  vpn[!(vpn %in% eye.invalid.bl)]
+vpn <-  vpn[!(vpn %in% exclusion.responses)]
+vpn <-  vpn[!(vpn %in% c("vp01", "vp02", "vp03"))]
 vpn.n = length(vpn)
 vps=vpn
 
@@ -22,6 +29,7 @@ for (vpn in vps) {
   code <- vpn
   print(code)
   ntrial <- 200
+  seqdat <- read.csv2(paste("Data/Analyse/prot/",vpn,".csv",sep=""))
   
   # Loop over trials to determine trial-by-trial baselines
   for (trial in 1:ntrial) {
@@ -37,12 +45,12 @@ for (vpn in vps) {
     
     # Filter 
     msgblock <- msgblock %>%
-      filter(message == paste(seqdat$pic[trial],".jpg",sep=""))  
+      filter(event == paste(seqdat$pic[trial],".jpg",sep=""))  
     
     # Check if correct Stimulus marker is present in MSG file
-    if (msgblock$message!=paste(seqdat$pic[trial],
+    if (msgblock$event!=paste(seqdat$pic[trial],
                                 ".jpg",sep="")) {
-      print(paste("Stimulus error: Trial:",trial," Event:",msgblock$message,sep=""))
+      print(paste("Stimulus error: Trial:",trial," Event:",msgblock$event,sep=""))
     }
     
     # write dataframe with onsets
