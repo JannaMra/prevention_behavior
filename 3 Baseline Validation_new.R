@@ -4,8 +4,8 @@
 # - Score baselines and determine baseline quality
 #
 
-path.prot <- "Analyse/prot/" %>% paste0(path, .)
-savepath <- "Analyse/BL/" %>% paste0(path, .)
+path.prot <- "Data/Analyse/prot/" %>% paste0(path, .)
+savepath <- "Data/Analyse/BL/" %>% paste0(path, .)
 
 
 # Baseline between -300 and 0 ms relative to stimulus onset
@@ -51,7 +51,7 @@ outlier_remove <- function(x,sdmult=3) {
 ######## Process ET Data
 
 # Load fixation list
-fixa <- read.table(paste(path,"Data/Eyelink/reports/Fixations.txt", sep=""),sep = '\t', skip=1 ,dec=",",na.strings=".")
+fixa <- read.table(paste(path,"Data/Eyelink/Prevention/Output/Fixations.txt", sep=""),sep = '\t', skip=1 ,dec=",",na.strings=".")
 names(fixa) <- c("vp","trial","timest","timeend","x","y")
 # have trials as numeric from 1:90 
 fixa$trial <- as.numeric(sub("Trial: ", "", fixa$trial))
@@ -60,10 +60,10 @@ fixa$trial <- ifelse(grepl("_2",fixa$vp),
        fixa$trial)
 fixa$vp <- sub("_1", "",fixa$vp)
 fixa$vp <- sub("_2", "",fixa$vp)
-write.csv2(fixa, paste0(path,"Analyse/Eyelink/fixa.csv"))
+write.csv2(fixa, paste0(path,"Data/Eyelink/fixa.csv"))
 
 # Load saccade list
-sacc <- read.table(paste(path,"Data/Eyelink/reports/Saccades.txt", sep=""),sep = '\t', skip=1 ,dec=",",na.strings=".")
+sacc <- read.table(paste(path,"Data/Eyelink/Prevention/Output/Saccades.txt", sep=""),sep = '\t', skip=1 ,dec=",",na.strings=".")
 names(sacc) <- c("vp","trial","blink","timest", "timeend","xst","yst", "xend", "yend")
 # have trials as numeric from 1:90 
 sacc$trial <- as.numeric(sub("Trial: ", "", sacc$trial))
@@ -72,20 +72,24 @@ sacc$trial <- ifelse(grepl("_2",sacc$vp),
                      sacc$trial)
 sacc$vp <- sub("_1", "",sacc$vp)
 sacc$vp <- sub("_2", "",sacc$vp)
-write.csv2(sacc, paste0(path,"Analyse/Eyelink/sacc.csv"))
+write.csv2(sacc, paste0(path,"Data/Eyelink/sacc.csv"))
 
 # Get onsets
-msg <- read.table(paste(path,"Data/Eyelink/reports/Messages.txt",sep=""),sep = '\t', skip = 1, dec=".", na.strings=".", 
+msg <- read.table(paste(path,"Data/Eyelink/Prevention/Output/Messages.txt",sep=""),sep = '\t', skip = 1, dec=".", na.strings=".", 
                   colClasses=c("character","character","numeric", "character"))
-names(msg) <- c("vp","trial","time", "message")
+names(msg) <- c("vp","trial","time", "event")
 msg$trial <- as.numeric(sub("Trial: ", "", msg$trial))
 msg$trial <- ifelse(grepl("_2",msg$vp), 
                     msg$trial+100, 
                     msg$trial)
 msg$vp <- sub("_1", "",msg$vp)
 msg$vp <- sub("_2", "",msg$vp)
-msg$message <- sub("Stimulus ", "",msg$message)
-write.csv2(msg, paste0(path,"Analyse/Eyelink/msg.csv"))
+msg$event <- sub("Stimulus ", "",msg$event)
+msg <- msg %>%
+  filter(event!= "!MODE RECORD CR 500 2 1 R")
+write.csv2(msg, paste0(path,"Data/Eyelink/msg.csv"))
+msg <- msg %>%
+  filter(event!= "Cue")
 
 
 # Determine which subjects should be analyzed
@@ -93,13 +97,11 @@ vpn = fixa$vp %>%
   unique() %>% sort() %>% as.character() #all subjects in fixations
 vpn.n = length(vpn)
 vpn = vpn[vpn %in% exclusions == F] #minus a priori exclusions
-#vpn <-  vpn[!(vpn %in% eye.invalid.bl)]
 vpn.n = length(vpn)
-vps=vpn
 
 # Exclusions:
-vpn <-  vpn[!(vpn %in% c())]
-
+vpn <-  vpn[!(vpn %in% c("vp01", "vp02", "vp03"))]
+vps=vpn
 
 # Loop Baseline Quality 
 
@@ -115,8 +117,8 @@ for (vpn in vps) {
     png(paste(savepath,vpn,".jpg",sep=""),width=500,height=500,pointsize=18)
   }
   
-  vpcode <- vpn
-  prot <- read.csv2(paste(path.prot,vpcode,".csv",sep=""),header=TRUE)
+  #vpcode <- vpn
+  prot <- read.csv2(paste(path.prot,vpn,".csv",sep=""),header=TRUE)
   prot$blx  <- NA
   prot$bly  <- NA
   prot$blok <- NA
@@ -124,15 +126,14 @@ for (vpn in vps) {
   
   baseline <- numeric()  # Position (x/y)
   validfix <- numeric()  # Valid fixation time (ms), excluding 1st fixation
-  code <- vpn
-  print(code)
+  print(vpn)
   
   ###########################################
   # 1. Determine baselines
   # Generate empty data field to store data
   
   # Determine trial number
-  vpfix <- fixa[tolower(fixa$vp)==code,]
+  vpfix <- fixa[tolower(fixa$vp)==vpn,]
   ntrial <- nrow(prot)
   
   # Loop over trials to determine trial-by-trial baselines
@@ -140,16 +141,16 @@ for (vpn in vps) {
     #trial = 1
     # Select trial data
     fixblock <- fixa[
-      tolower(fixa$vp)==code & #tolower = translates characters in character vectors
+      tolower(fixa$vp)==vpn & #tolower = translates characters in character vectors
         fixa$trial==trial,]
     msgblock <- msg [
-      tolower(msg$vp)==code &
+      tolower(msg$vp)==vpn &
         msg$trial==trial,]
     
     # Check if correct Stimulus marker is present in MSG file
-    if (msgblock$message!=paste(prot$pic[trial],
+    if (msgblock$event!=paste(prot$pic[trial],
                                ".jpg",sep="")) {
-       print(paste("Stimulus error: Trial:",trial," Event:",msgblock$message,sep=""))
+       print(paste("Stimulus error: Trial:",trial," Event:",msgblock$event,sep=""))
      }
     
     # Determine onset (in ms)
@@ -208,7 +209,7 @@ for (vpn in vps) {
   if (plotBL) {
     plot(baseline[,1],baseline[,2],pch=16,col="black",xlab="x (px)",ylab="y (px)",xlim=c(0,1920),ylim=c(0,1080))
     points(baseline[blok==0,1],baseline[blok==0,2],pch=16,col="red")
-    title(code)
+    title(vpn)
   }
   
   # Store number of valid baselines per subject
@@ -219,7 +220,7 @@ for (vpn in vps) {
   yrng <- max(baseline[blok==1,2])-min(baseline[blok==1,2])
   bl_quality_vp <- c(bl_quality_vp,xrng,yrng)
   
-  write.csv2(prot,paste(path.prot,vpcode,"_BL.csv",sep=""),row.names=FALSE,quote=FALSE)
+  write.csv2(prot,paste(path.prot,vpn,"_BL.csv",sep=""),row.names=FALSE,quote=FALSE)
   
   bl_quality <- rbind(bl_quality,bl_quality_vp)
   
@@ -229,7 +230,7 @@ for (vpn in vps) {
 }
 
 erg <- data.frame(vps,bl_quality,row.names=NULL)
-names(erg) <- c("code","alltrials","blok","xrng","yrng")
+names(erg) <- c("vpn","alltrials","blok","xrng","yrng")
 
 # Mark problematic cases
 erg$pblok <- erg[,3]/erg[,2]
