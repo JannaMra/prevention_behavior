@@ -33,10 +33,7 @@ library(tidyverse)
   exclusions = c(
   ) %>% unique() %>% sort()
   
-  exclusions.onlyGen = c(
-  ) %>% unique() %>% sort()
-  
-  trials.n = 180 #number of trials that shall be analyzed (if more trials, last ones will be taken)
+  trials.n = 200 #number of trials that shall be analyzed (if more trials, last ones will be taken)
   
   preStim = 2000
   trialEnd = 10000
