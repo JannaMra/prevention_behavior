@@ -68,7 +68,7 @@ vpn = vpn[vpn %in% exclusions == F] #minus a priori exclusions
 vpn.n = length(vpn)
 
 # Exclusions:
-vpn <-  vpn[!(vpn %in% c("vp01", "vp02", "vp03"))]
+vpn <-  vpn[!(vpn %in% c())]
 vps=vpn
 
 # Iterative outlier removal
@@ -297,3 +297,4 @@ write.csv2(erg,paste(path.prot,"Results_BaselineCheck_blockwise.csv",sep=""),row
 
 # Define cases with too many outliers (>50%) to exclude from further analyses
 eye.invalid.bl <- erg %>% filter(prob == 1) %>% pull(vp) %>% unique()
+
