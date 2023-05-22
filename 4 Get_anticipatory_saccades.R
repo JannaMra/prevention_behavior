@@ -17,7 +17,7 @@ vpn.n = length(vpn)
 vpn = vpn[vpn %in% exclusions == F] #minus a priori exclusions
 vpn <-  vpn[!(vpn %in% eye.invalid.bl)]
 vpn <-  vpn[!(vpn %in% exclusion.responses)]
-vpn <-  vpn[!(vpn %in% c("vp01", "vp02", "vp03"))]
+vpn <-  vpn[!(vpn %in% c())]
 vpn.n = length(vpn)
 vps=vpn
 
@@ -140,6 +140,11 @@ firstprotsacc %>%
     end_y = mean(yend),
     percent_missing = 1-(length(trial)/(vpn.n*50))
   )
-  
+
+
+# To do -------------------------
+# Für Baseline korrigieren 
+# Evtl. pro Person durchschnittliche Saccade nach oben und dann über alle mitteln? 
+# Wie viel Prozent missings? Wie viele fehlen aufgrund fehlender Reaktionen?
 
 
