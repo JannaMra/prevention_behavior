@@ -9,7 +9,7 @@ path.seq <- "Data/sequences/" %>% paste0(path, .)
 savepath <- "Data/Analyse/prot/" %>% paste0(path, .)  
 
 
-vpn <- paste("vp",ifelse(4:34<10,"0",""),4:34,sep="")
+vpn <- paste("vp",ifelse(1:48<10,"0",""),1:48,sep="")
 #vpn <- "vp04"
 #vpn <- "vp01"
 # Exclusions:
@@ -25,6 +25,7 @@ responses.summary <- data.frame()
 
 for (vp in vpn) {
   print(vp)
+  #vp <- "vp40"
   
   seqdat1 <- read.table(paste(path.seq,vp,"_1.txt",sep=""),header=TRUE)
   seqdat2 <- read.table(paste(path.seq,vp,"_2.txt",sep=""),header=TRUE)
@@ -39,12 +40,15 @@ for (vp in vpn) {
   header.logdat <- read.table(file=paste(path.log,vp,"_1-PreventionBehavior.log",sep=""), skip = 3, 
                               nrows = 1, header = FALSE, sep ="\t", stringsAsFactors = FALSE)
   logdat1  <- read.table(file=paste(path.log,vp,"_1-PreventionBehavior.log",sep=""), 
-                        sep="\t", skip = 4, header=FALSE,fill=TRUE)
+                        sep="\t", skip = 2, header=TRUE,fill=TRUE) 
   logdat2  <- read.table(file=paste(path.log,vp,"_2-PreventionBehavior.log",sep=""), 
-                         sep="\t", skip = 8, header=FALSE,fill=TRUE)     # skip 8, so that "responses" are not counted as responses to cue
-  logdat <- bind_rows(logdat1, logdat2)
-  header.logdat[3]<- "Event.Type"
-  colnames( logdat ) <- unlist(header.logdat)
+                         sep="\t", skip = 2, header=TRUE,fill=TRUE)     # skip 8, so that "responses" are not counted as responses to cue
+  logdat <- bind_rows(logdat1, logdat2) 
+  logdat <- logdat %>%
+    filter(grepl(vp, Subject))%>%
+    filter(!grepl("subject", Subject))
+  #header.logdat[3]<- "Event.Type"
+  #colnames( logdat ) <- unlist(header.logdat)
   
   aktstim <- 1
   #aktstim <- 3
