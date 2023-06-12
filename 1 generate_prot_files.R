@@ -9,7 +9,7 @@ path.seq <- "Data/sequences/" %>% paste0(path, .)
 savepath <- "Data/Analyse/prot/" %>% paste0(path, .)  
 
 
-vpn <- paste("vp",ifelse(1:48<10,"0",""),1:48,sep="")
+vpn <- paste("vp",ifelse(1:56<10,"0",""),1:56,sep="")
 #vpn <- "vp04"
 #vpn <- "vp01"
 # Exclusions:

@@ -1,11 +1,8 @@
 ############################################################################
-# ShockScanning_Flight fMRI project
+# Prevention Behavior project
 # 
-# General 
-# Design:
-# Shock (cue1) vs NoShock (cue2) vs Flight (cue0)
-# Stimulation:
-# 2s fixation cross -> 8s stimulus -> 6-8s fixation cross with shock or notif(!require(tidyverse)) install.packages("tidyverse"); library(tidyverse)
+# 
+
 
 requirePackage = function(name, load=T) {
   package = as.character(name)
@@ -61,7 +58,7 @@ path = getwd() %>% paste0("/")
   #"C:/Users/jat41gk/Documents/Projekte/Prevention behavior/Auswertung/" #@work
 
 #load behavioral data (logs)
-path.eye = "Data/Eyelink/reports/" %>% paste0(path, .) #eye tracking data
+path.eye = "Data/Eyelink/Prevention/Output/" %>% paste0(path, .) #eye tracking data
 #path.trigger = "Data/Tobii/trigger/" %>% paste0(path, .) #get condition 
 path.prot = "Analyse/prot/" %>% paste0(path, .)
 

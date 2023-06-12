@@ -1,11 +1,7 @@
 ############################################################################
-# ShockScanning_Flight Oscillations project
+# Prevention Behavior project
 # 
-# Get Fixations from Gazedata-Files
-# Design:
-# Shock (cue1) vs NoShock (cue2) vs Flight (cue0)
-# Stimulation:
-# 2s fixation cross -> 8s stimulus -> 6-8s fixation cross with shock or not
+# 
 
 library(tidyverse)
 library(readr)

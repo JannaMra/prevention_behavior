@@ -116,6 +116,7 @@ firstprotsacc %>%
   summarize(
     start_y = mean(yst),
     end_y = mean(yend),
+    diff= start_y-end_y,
     percent_missing = 1-(length(trial)/(vpn.n*50))
   )
 
@@ -128,6 +129,7 @@ firstprotsacc %>%
   summarize(
     start_y = mean(yst),
     end_y = mean(yend),
+    diff = start_y - end_y,
     percent_missing = 1-(length(trial)/(vpn.n*50))
   )
 
@@ -138,6 +140,7 @@ firstprotsacc %>%
   summarize(
     start_y = mean(yst),
     end_y = mean(yend),
+    diff = start_y - end_y,
     percent_missing = 1-(length(trial)/(vpn.n*50))
   )
 
