@@ -1,7 +1,9 @@
 ############################################################################
 # Prevention Behavior project
 # 
-# 
+# operant(active):  1 = active, 0 = passive
+# valence: 1 = positive, 0 = negative
+# group: 1 = pos blue & neg yellow, 2 = pos yellow & neg blue
 
 # Get Onset Picture/no picture
 
@@ -146,8 +148,9 @@ firstprotsacc %>%
 
 
 # To do -------------------------
-# Für Baseline korrigieren 
-# Evtl. pro Person durchschnittliche Saccade nach oben und dann über alle mitteln? 
-# Wie viel Prozent missings? Wie viele fehlen aufgrund fehlender Reaktionen?
+# Für Baseline korrigieren - Janna
+# Alle Trials mit invalider Baseline ausschließen - Janna
+# Evtl. pro Person durchschnittliche Saccade nach oben und dann über alle mitteln? - Solveig
+# Wie viel Prozent missings? Wie viele fehlen aufgrund fehlender Reaktionen? - Solveig
 
 
