@@ -25,7 +25,7 @@ responses.summary <- data.frame()
 
 for (vp in vpn) {
   print(vp)
-  #vp <- "vp40"
+  #vp <- "vp04"
   
   seqdat1 <- read.table(paste(path.seq,vp,"_1.txt",sep=""),header=TRUE)
   seqdat2 <- read.table(paste(path.seq,vp,"_2.txt",sep=""),header=TRUE)
@@ -115,7 +115,7 @@ for (vp in vpn) {
   print(paste0("Response in passive trials: ",sum(seqdat$operant==0 & seqdat$response==1)))
   seqdat <- seqdat %>% 
     mutate(problem = case_when(
-      operant==1 & response==0 | operant==0 & response==1 ~ 1,
+      operant==1 & response==0 | operant==0 & response>=1 ~ 1,
       operant==1 & response==1 | operant==0 & response==0 ~ 0)
       )
   
