@@ -94,7 +94,7 @@ for (vpn in vps) {
     antsacc <- bind_rows(antsacc,saccblock)
   }
   # Comine with trial-info
-  seqdat <- read.csv2(paste("Data/Analyse/prot/",vpn,".csv",sep=""))
+  seqdat <- read.csv2(paste("Data/Analyse/prot/",vpn,"_BL.csv",sep=""))
   seqdatall <- bind_rows(seqdatall,seqdat)
   protsacc <- merge(seqdatall, antsacc, by = c("vp", "trial"))
 }
@@ -102,54 +102,72 @@ for (vpn in vps) {
 protsacc <- protsacc %>%
   arrange(vp, trial)
 
-# use only first saccade
+# use only first saccade and only trials with valid baseline
 firstprotsacc <- protsacc %>%
   group_by(vp, trial)%>%
+  filter(blok==1)%>%
   filter(row_number()==1)%>%
   ungroup()
+
+# correct for individual baselines
+firstprotsacc <- firstprotsacc %>%
+  mutate(x_st = xst-blmeanx,
+         y_st = yst-blmeany,
+         x_end = xend -blmeanx,
+         y_end = yend -blmeany)%>%
+  filter(case_when(operant==0 ~ response == 0,  #filter out false or multiple responses
+                   operant==1 ~ response == 1)
+  )%>%
+  mutate(saccade_length = y_st - y_end)
 
 firstprotsacc %>%
   summarize(
     percent_missing = 1-(length(firstprotsacc$trial)/(vpn.n*200))
   ) 
  
-firstprotsacc %>%
-  group_by(valence, operant) %>%
-  summarize(
-    start_y = mean(yst),
-    end_y = mean(yend),
-    diff= start_y-end_y,
-    percent_missing = 1-(length(trial)/(vpn.n*50))
-  )
+# firstprotsacc %>%
+#   group_by(valence, operant) %>%
+#   summarize(
+#     start_y = mean(yst),
+#     end_y = mean(yend),
+#     diff= start_y-end_y,
+#     percent_missing = 1-(length(trial)/(vpn.n*50))
+#   )
 
 # Abhängig von Reaktion/keiner Reaktion 
 
-firstprotsacc %>%
-  filter(operant == 1) %>%
-  filter(response == 1) %>%
-  group_by(valence) %>%
-  summarize(
-    start_y = mean(yst),
-    end_y = mean(yend),
-    diff = start_y - end_y,
-    percent_missing = 1-(length(trial)/(vpn.n*50))
-  )
+# firstprotsacc %>%
+#   filter(operant == 1) %>%
+#   filter(response == 1) %>%
+#   group_by(valence) %>%
+#   summarize(
+#     start_y = mean(yst),
+#     end_y = mean(yend),
+#     diff = start_y - end_y,
+#     percent_missing = 1-(length(trial)/(vpn.n*50))
+#   )
+# 
+# firstprotsacc %>%
+#   filter(operant == 0) %>%
+#   filter(response == 0) %>%
+#   group_by(valence) %>%
+#   summarize(
+#     start_y = mean(yst),
+#     end_y = mean(yend),
+#     diff = start_y - end_y,
+#     percent_missing = 1-(length(trial)/(vpn.n*50))
+#   )
 
 firstprotsacc %>%
-  filter(operant == 0) %>%
-  filter(response == 0) %>%
-  group_by(valence) %>%
-  summarize(
-    start_y = mean(yst),
-    end_y = mean(yend),
-    diff = start_y - end_y,
+  group_by(operant, valence)%>%
+  summarise(
+    mean = mean(saccade_length),
+    sd = sd(saccade_length),
+    se = se(saccade_length),
     percent_missing = 1-(length(trial)/(vpn.n*50))
   )
-
 
 # To do -------------------------
-# Für Baseline korrigieren - Janna
-# Alle Trials mit invalider Baseline ausschließen - Janna
 # Evtl. pro Person durchschnittliche Saccade nach oben und dann über alle mitteln? - Solveig
 # Wie viel Prozent missings? Wie viele fehlen aufgrund fehlender Reaktionen? - Solveig
 
