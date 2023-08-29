@@ -67,7 +67,7 @@ pupil.plot = pupil_long%>% group_by(operant, valence, time) %>%
 print(pupil.plot %>% ggplot(aes(x=time, y=mmChange, color=condition, group=condition)) + 
         #geom_dotplot(data=pupil.ga.gen.subj, mapping=aes(group=threat, fill=threat), binaxis="y", alpha=.25, color="black", stackratio=1, stackdir="centerwhole", dotsize=.5) +
         #geom_point() + geom_path(data=pupil.ga.gen %>% dplyr::filter(threat %in% c("CS-", "CS+")), color = "black", size=1.5) + #generalization line (geom_point first for order of x-axis)
-        geom_line(size=1) + #geom_point(size=4.5) + 
+        geom_line(linewidth=1) + #geom_point(size=4.5) + 
         geom_ribbon(aes(ymin=mmChange-mmChange.se, ymax=mmChange+mmChange.se, color=condition), color = NA, alpha=.1) + 
         scale_colour_viridis_d() +
         geom_line(aes(x = 100), color = "black") +
