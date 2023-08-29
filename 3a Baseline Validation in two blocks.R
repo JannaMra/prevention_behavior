@@ -124,6 +124,8 @@ for (vpn in vps) {
   validfix <- numeric()  # Valid fixation time (ms), excluding 1st fixation
   print(vpn)
   
+  code <- vpn
+  
   ###########################################
   # 1. Determine baselines
   # Generate empty data field to store data

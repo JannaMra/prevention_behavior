@@ -62,6 +62,8 @@ for (vpn in vps) {
 }
 
 onset$preonset <- onset$time-600
+write.csv2(onset,paste(path,"Data/Eyelink/Onsets.csv",sep=""),row.names=FALSE,quote=FALSE)
+
 antsacc <- data.frame()
 seqdatall <- data.frame()
 
@@ -101,6 +103,10 @@ for (vpn in vps) {
 
 protsacc <- protsacc %>%
   arrange(vp, trial)
+
+# Percent invalid Baselines after exclusion
+sum(seqdatall$blok==0)/length(seqdatall$blok)
+  
 
 # use only first saccade and only trials with valid baseline
 firstprotsacc <- protsacc %>%
