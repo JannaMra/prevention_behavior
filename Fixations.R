@@ -168,6 +168,10 @@ for (vpn in vps) {
     # Filter
     fixablock <- fixablock %>%
       filter(timeend >= onsetblock$time & timest <= onsetblock$time+2700)
+    fixablock <- fixablock %>%
+      mutate(timeend = ifelse (timeend > onsetblock$time+2700, onsetblock$time+2700, fixablock$timeend))
+    fixablock <- fixablock %>%
+      mutate(timest = ifelse (timest < onsetblock$time, onsetblock$time, fixablock$timest))  
     
     # write dataframe with anticipatory saccades
     picturefixa <- bind_rows(picturefixa,fixablock)
@@ -190,15 +194,15 @@ protpicturefixa <- protpicturefixa %>%
 
 # use only trials where picture is shown
 protpicturefixa <- protpicturefixa %>%
-  filter((valence==1 & operant ==1)|(valence == 0 & operant == 0))  #positv aktiv, aversiv passiv = hier kommen Bilder
+  filter((valence==1 & operant ==1 & response == 1)|(valence == 0 & operant == 0 & response == 0)|(valence == 0 & operant == 1 & response == 0))  #positv aktiv, aversiv passiv = hier kommen Bilder
 
 # correct for individual baselines
 protpicturefixa <- protpicturefixa %>%
   mutate(x = x-blmeanx,
          y = (y-blmeany)*(-1)) %>%
-  filter(case_when(operant==0 ~ response == 0,  #filter out false or multiple responses
-                   operant==1 ~ response == 1)
-  )%>%
+  #filter(case_when(operant==0 ~ response == 0,  #filter out false or multiple responses
+                   #operant==1 ~ response == 1)
+  #)%>%
   mutate(OpPrev = ifelse(valence == 1,"operant", "prevent"),
          ActPass = ifelse(operant == 1, "active", "passive")) 
 
@@ -220,25 +224,35 @@ plotpicturefixa <- protpicturefixa %>%
     mean_percent = mean(percent),
     sd = sd(percent),
     se = se(percent)
+  )%>%
+  mutate(
+    Condition = case_when(ActPass == "active" & OpPrev == "operant" ~ "active operant",
+                          ActPass == "active" & OpPrev == "prevent" ~ "active (not) prevent",
+                          ActPass == "passive" & OpPrev == "prevent" ~ "passive prevent")
   )
 
 plotpicturefixa_test <- protpicturefixa %>%
-  group_by(vp, OpPrev) %>%
+  group_by(vp, OpPrev, ActPass) %>%
   summarise(
     mean_percent = mean(percent),
     sd = sd(percent),
     se = se(percent)
+  )%>%
+  mutate(
+    Condition = case_when(ActPass == "active" & OpPrev == "operant" ~ "active operant",
+                          ActPass == "active" & OpPrev == "prevent" ~ "active (not) prevent",
+                          ActPass == "passive" & OpPrev == "prevent" ~ "passive prevent")
   )
 
-ggplot(data = plotpicturefixa, mapping = aes(x = OpPrev, y = mean_percent, fill = OpPrev)) +
+ggplot(data = plotpicturefixa, mapping = aes(x = Condition, y = mean_percent, fill = ActPass)) +
   geom_point(size = 3) +
   geom_path(linewidth = 1) +
   geom_errorbar(aes(ymin = mean_percent - se, ymax = mean_percent + se), width = 0.05) +
-  geom_violin(data = plotpicturefixa_test, mapping=aes(x= OpPrev, y = mean_percent), alpha = .2) +
+  geom_violin(data = plotpicturefixa_test, mapping=aes(x= Condition, y = mean_percent, fill = ActPass), alpha = .2) +
   scale_color_manual(labels = c("active", "passive"), values = c("#6BBFA3", "#007AC3")) +
   ylab("Percent of Time spent looking at picture +- SE") +
   theme_classic()
 
-t.test(mean_percent ~ OpPrev, data = plotpicturefixa_test, paired = T) %>% schoRsch::t_out()
+t.test(mean_percent ~ ActPass, data = plotpicturefixa_test %>% filter(Condition == "active operant" | Condition == "passive prevent"), paired = T) %>% schoRsch::t_out()
 
 
