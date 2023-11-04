@@ -108,3 +108,41 @@ dat <- dat %>% mutate(
 )
 
 data.table::fwrite(dat, "dat2.csv", sep = ",", dec = ".")
+
+
+
+
+#---------------------------------------------------------
+#Ratings
+
+rm(list=ls()) 
+options(digits = 7)
+library(tidyverse)
+library(data.table)
+
+
+bad_subjects <- c("vp10", "vp11", "vp12", "vp15", "vp17", "vp27", "vp34", "vp51")
+
+
+dir <- ".\\Data\\Rating\\"
+filename_pattern <- "vp\\d{2,}\\_rating.csv"
+
+file_list <- list.files(path = dir, pattern = filename_pattern, full.names = T, recursive = T, no.. = T)
+dat_rating <- rainR::merge_files(file_list, dec = ".")
+
+dat_rating <- dat_rating %>% mutate(
+  posneg = ifelse(str_detect(pic, "pos") == T, "positive", NA),
+  posneg = ifelse(str_detect(pic, "neg") == T, "negative", posneg),
+)
+
+dat_rating <- dat_rating %>% mutate(
+  vp = str_extract(fileName, "vp\\d{2,}")
+)
+
+dat_rating <- dat_rating %>% relocate(vp, .before = nr)
+dat_rating <- dat_rating %>% relocate(posneg, .after = nr)
+
+
+data.table::fwrite(dat_rating, "dat_rating.csv", sep = ",", dec = ".")
+
+
