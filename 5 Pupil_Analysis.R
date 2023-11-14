@@ -211,3 +211,4 @@ pupil_long_test <- pupil_long %>%
   )
 
 ez::ezANOVA(data = pupil_long_test, dv = Anticipation, wid = vp, within = c(OpPrev, ActPass), detailed = TRUE) %>% schoRsch::anova_out()
+t.test(Anticipation ~ OpPrev, data= (pupil_long_test %>% dplyr::filter((OpPrev == "prevent" & ActPass == "passive")|(OpPrev == "operant" & ActPass == "passive"))), paired = T) %>% schoRsch::t_out()

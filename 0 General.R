@@ -55,10 +55,12 @@ getwd()
 #setwd("C:/Users/jat41gk/Documents/Projekte/Prevention behavior/prevention_behavior/")
 setwd('..')
 path = getwd() %>% paste0("/")
+  #"C:/Users/jat41gk/Documents/Projekte/Prevention behavior/Follow-Up Experiment/" #@work
   #"C:/Users/jat41gk/Documents/Projekte/Prevention behavior/Auswertung/" #@work
 
 #load behavioral data (logs)
-path.eye = "Data/Eyelink/Prevention/Output/" %>% paste0(path, .) #eye tracking data
+path.eye = #"Data/Eyelink/Prevention/Output/" %>% paste0(path, .) #eye tracking data
+           "Data/Eyelink/Prevention_Follow_up/Output/" %>% paste0(path, .)
 #path.trigger = "Data/Tobii/trigger/" %>% paste0(path, .) #get condition 
 path.prot = "Analyse/prot/" %>% paste0(path, .)
 

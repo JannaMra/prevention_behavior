@@ -62,12 +62,15 @@ for (vpn in vps) {
 }
 
 protfixa <- protfixa %>%
-  arrange(vp, trial)
+  arrange(vp, trial)%>%
+  filter(blok==1)
+
+# Isabelle: filter time interval 
 
 # use only last fixation and only trials with valid baseline
 lastprotfixa <- protfixa %>%
   group_by(vp, trial)%>%
-  filter(blok==1)%>%
+  #filter(blok==1)%>%
   filter(row_number()== n())%>%
   ungroup()
 
@@ -125,18 +128,42 @@ fixaupperhalf %>%
     percent = sum(upperhalf)/length(upperhalf)
   )
 
-# Percent of fixations that lies within picture (anticipation)
+# Percent of last fixations that lies within picture (anticipation)
 
 fixapicture <- lastprotfixa %>% ungroup()%>%
   mutate(picture_y = ifelse((y >= 212.5 & y <= 587.5),1,0),       #y-coordinates of picture (if cue is origin) picture: 500 x 375 pixels, center 400 pixels away from cue center
          picture_x = ifelse((x >= -250 & x <= 250),1,0),          #x-coordinates of picture (if cue is origin)
          picture = ifelse((picture_x == 1 & picture_y == 1),1,0)) 
 
-fixapicture %>%
+plotfixapicture <- fixapicture %>%
   group_by(ActPass, OpPrev) %>%
   summarise(
-    percent = sum(picture)/length(picture)
+    percent = mean(picture),
+    se = se(picture),
+    percent_missing = 1-(length(trial)/(vpn.n*50))
   )
+
+ez::ezANOVA(data = fixapicture, dv = picture, wid = vp, within = c(OpPrev, ActPass), detailed = TRUE) %>% schoRsch::anova_out()
+
+ggplot(data = plotfixapicture, mapping = aes(x = OpPrev, y = percent, group = ActPass, color = ActPass)) +
+  geom_point(size = 3) +
+  geom_path(linewidth = 1) +
+  geom_errorbar(aes(ymin = percent - se, ymax = percent + se), width = 0.05) +
+  scale_color_manual(labels = c("active", "passive"), values = c("#6BBFA3", "#007AC3")) +
+  ylab("Percentage of Fixations within Picture-Area during Anticipation +- SE") +
+  theme_classic()
+
+fixapicture_t.test <- fixapicture %>% group_by(vp, OpPrev, ActPass) %>%
+  summarise(percent = mean(picture))
+
+t.test(percent ~ OpPrev, data= (fixapicture_t.test %>% filter(ActPass == "passive")), paired = T) %>% schoRsch::t_out()
+t.test(percent ~ OpPrev, data= (fixapicture_t.test %>% filter(ActPass == "active")), paired = T) %>% schoRsch::t_out()
+
+t.test(percent ~ ActPass, data= (fixapicture_t.test %>% filter(OpPrev == "prevent")), paired = T) %>% schoRsch::t_out()
+t.test(percent ~ ActPass, data= (fixapicture_t.test %>% filter(OpPrev == "operant")), paired = T) %>% schoRsch::t_out()
+
+t.test(percent ~ OpPrev, data= (fixapicture_t.test %>% filter((OpPrev == "prevent" & ActPass == "active")|(OpPrev == "operant" & ActPass == "passive"))), paired = T) %>% schoRsch::t_out()
+t.test(percent ~ OpPrev, data= (fixapicture_t.test %>% filter((OpPrev == "operant" & ActPass == "active")|(OpPrev == "prevent" & ActPass == "passive"))), paired = T) %>% schoRsch::t_out()
 
 
 
