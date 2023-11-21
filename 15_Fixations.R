@@ -17,10 +17,9 @@ onset <- read.csv2(paste0(path,"Data/Eyelink/Onsets.csv"))
 vpn = fixa$vp %>% 
   unique() %>% sort() %>% as.character() #all subjects in fixations
 vpn.n = length(vpn)
-vpn = vpn[vpn %in% exclusions == F] #minus a priori exclusions
 vpn <-  vpn[!(vpn %in% eye.invalid.bl)]
 vpn <-  vpn[!(vpn %in% exclusion.responses)]
-vpn <-  vpn[!(vpn %in% c())]
+#vpn <-  vpn[!(vpn %in% c())]
 vpn.n = length(vpn)
 vps=vpn
 

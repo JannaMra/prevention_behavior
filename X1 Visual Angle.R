@@ -35,3 +35,4 @@ vay <- 2*(atan((swy/2)/sdist)/pi*180)
 
 # Pixels per 1 deg of visual angle
 xdeg <- wx/vax
+ydeg <- wy/vay
