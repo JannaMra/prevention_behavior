@@ -9,8 +9,8 @@ path.seq <- "Data/sequences/" %>% paste0(path, .)
 savepath <- "Data/Analyse/prot/" %>% paste0(path, .)  
 
 
-vpn <- paste("vp",ifelse(1:3<10,"0",""),1:3,sep="")
-#vpn <- paste("vp",ifelse(1:56<10,"0",""),1:56,sep="")
+vpn <- paste("vp",ifelse(1:68<10,"0",""),1:68,sep="") #Experiment 2
+#vpn <- paste("vp",ifelse(1:56<10,"0",""),1:56,sep="") #Experiment 1
 #vpn <- "vp04"
 #vpn <- "vp01"
 # Exclusions:
@@ -26,7 +26,7 @@ responses.summary <- data.frame()
 
 for (vp in vpn) {
   print(vp)
-  #vp <- "vp04"
+  #vp <- "vp68"
   
   seqdat1 <- read.table(paste(path.seq,vp,"_1.txt",sep=""),header=TRUE)
   seqdat2 <- read.table(paste(path.seq,vp,"_2.txt",sep=""),header=TRUE)
@@ -34,6 +34,7 @@ for (vp in vpn) {
   seqdat$vp <- vp
   seqdat$trial <- c(1:200)
   
+  seqdat$response <- NA 
   seqdat$rt        <- NA  # Reaktionszeit
   
   
@@ -46,6 +47,7 @@ for (vp in vpn) {
                          sep="\t", skip = 2, header=TRUE,fill=TRUE)     # skip 8, so that "responses" are not counted as responses to cue
   logdat <- bind_rows(logdat1, logdat2) 
   logdat <- logdat %>%
+    mutate(Subject = tolower(Subject))%>%
     filter(grepl(vp, Subject))%>%
     filter(!grepl("subject", Subject))
   #header.logdat[3]<- "Event.Type"
@@ -128,7 +130,7 @@ for (vp in vpn) {
 }
 
 # list of exclusions
-print(exclusion.responses <- responses.summary %>% filter(missing.prevention/50 > 0.5 | missing.creation/50 > 0.5) %>% .$vp %>% unique())
+print(exclusion.responses <- responses.summary %>% filter(missing.prevention/50 > 0.5 | missing.creation/50 > 0.5 | reaction.passive/50 > 0.5) %>% .$vp %>% unique())
 
 
 
