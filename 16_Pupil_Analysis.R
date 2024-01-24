@@ -25,9 +25,9 @@ for (vpn in vps) {
   code <- vpn
   print(code)
   
-  pupildat.vp <- read.csv2(paste("Data/Pupil/",vpn,"_pupil.csv",sep=""))
+  pupildat.vp <- read.csv2(paste(path,"Data/Pupil/",vpn,"_pupil.csv",sep=""))
   pupildat.vp$vp <- code
-  pupildat.vp <- pupildat.vp[, c(162, 1:161)]
+  pupildat.vp <- pupildat.vp[, c(502, 1:501)]
   pupildat <- bind_rows(pupildat, pupildat.vp)
 }
 
@@ -39,7 +39,7 @@ for (vpn in vps) {
   print(code)
   
   # Comine with trial-info
-  seqdat <- read.csv2(paste("Data/Analyse/prot/",vpn,"_BL.csv",sep=""))
+  seqdat <- read.csv2(paste(path,"Data/Analyse/prot/",vpn,"_BL.csv",sep=""))
   seqdatall <- bind_rows(seqdatall,seqdat)
   pupil <- merge(seqdatall, pupildat, by = c("vp", "trial"))
 }
@@ -53,16 +53,25 @@ pupil_long <- pupil %>% pivot_longer(
   names_prefix = "pd",
   values_to = "mmChange"
 )
-
 pupil_long$time <- as.numeric(pupil_long$time)
+
+Baselines <- pupil_long %>%
+  group_by(vp, trial)%>%
+  dplyr::filter(time <= 100)%>%
+  dplyr::filter(time > 50)%>%
+  summarise(
+    Baseline = mean(mmChange, na.rm = TRUE)
+  )
+
+
 
 pupil.plot = pupil_long%>% group_by(operant, valence, time) %>% 
   summarise(mmChange.se = se(mmChange, na.rm=T), mmChange = mean(mmChange, na.rm=T))%>%
   mutate(condition = case_when(
-    operant == 1 & valence == 1 ~ "Create Positive Pic",
-    operant == 1 & valence == 0 ~ "Prevent Negative Pic",
-    operant == 0 & valence == 1 ~ "No Positive Pic",
-    operant == 0 & valence == 0 ~ "View Negative Pic"
+    operant == 1 & valence == 1 ~ "Operant active",
+    operant == 1 & valence == 0 ~ "Prevent active",
+    operant == 0 & valence == 1 ~ "Operant passiv",
+    operant == 0 & valence == 0 ~ "Prevent passive"
   ))
 print(pupil.plot %>% ggplot(aes(x=time, y=mmChange, color=condition, group=condition)) +
         #geom_dotplot(data=pupil.ga.gen.subj, mapping=aes(group=threat, fill=threat), binaxis="y", alpha=.25, color="black", stackratio=1, stackdir="centerwhole", dotsize=.5) +
@@ -106,7 +115,7 @@ for (vpn in vps) {
   code <- vpn
   print(code)
   
-  pupildat.vp <- read.csv2(paste("Data/Pupil/",vpn,"_pupil_anticipation.csv",sep=""))
+  pupildat.vp <- read.csv2(paste(path,"Data/Pupil/",vpn,"_pupil_anticipation.csv",sep=""))
   pupildat.vp$vp <- code
   pupildat.vp <- pupildat.vp[, c(162, 1:161)]
   pupildat <- bind_rows(pupildat, pupildat.vp)
@@ -120,7 +129,7 @@ for (vpn in vps) {
   print(code)
   
   # Comine with trial-info
-  seqdat <- read.csv2(paste("Data/Analyse/prot/",vpn,"_BL.csv",sep=""))
+  seqdat <- read.csv2(paste(path,"Data/Analyse/prot/",vpn,"_BL.csv",sep=""))
   seqdatall <- bind_rows(seqdatall,seqdat)
   pupil <- merge(seqdatall, pupildat, by = c("vp", "trial"))
 }
@@ -137,12 +146,6 @@ pupil_long <- pupil %>% pivot_longer(
 
 pupil_long$time <- as.numeric(pupil_long$time)
 
-Baselines <- pupil_long %>%
-  group_by(vp, trial)%>%
-  dplyr::filter(time == 1:10)%>%
-  summarise(
-    Baseline = mean(mmChange, na.rm = TRUE)
-  )
 pupil_long <- merge(pupil_long, Baselines, by = c("vp", "trial"))
 pupil_long <- pupil_long %>%
   mutate(
@@ -159,11 +162,12 @@ pupil_long <- pupil_long %>%
 pupil.plot = pupil_long%>% group_by(operant, valence, time) %>% 
   summarise(mmChange.se = se(mmChange, na.rm=T), mmChange = mean(mmChange, na.rm=T))%>%
   mutate(condition = case_when(
-    operant == 1 & valence == 1 ~ "Create Positive Pic",
-    operant == 1 & valence == 0 ~ "Prevent Negative Pic",
-    operant == 0 & valence == 1 ~ "No Positive Pic",
-    operant == 0 & valence == 0 ~ "View Negative Pic"
-  ))
+    operant == 1 & valence == 1 ~ "Operant active",
+    operant == 1 & valence == 0 ~ "Prevent active",
+    operant == 0 & valence == 1 ~ "Operant Passive",
+    operant == 0 & valence == 0 ~ "Prevent Passive"
+  ))#%>%
+  #filter(time >= -600)
 
 print(pupil.plot %>% ggplot(aes(x=time, y=mmChange, color=condition, group=condition)) + 
         #geom_dotplot(data=pupil.ga.gen.subj, mapping=aes(group=threat, fill=threat), binaxis="y", alpha=.25, color="black", stackratio=1, stackdir="centerwhole", dotsize=.5) +

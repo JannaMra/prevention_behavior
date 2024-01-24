@@ -10,7 +10,7 @@
 # - Save single-trial data
 
 require("eyelinkReader")
-require("signal")
+#require("signal") #read in functions with signal::, otherwise filter()function from dplyr does not work anymore
 
 options(warn=0)
 
