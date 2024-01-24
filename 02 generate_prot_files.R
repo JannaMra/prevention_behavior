@@ -9,8 +9,8 @@ path.seq <- "Data/sequences/" %>% paste0(path, .)
 savepath <- "Data/Analyse/prot/" %>% paste0(path, .)  
 
 
-vpn <- paste("vp",ifelse(1:68<10,"0",""),1:68,sep="") #Experiment 2
-#vpn <- paste("vp",ifelse(1:56<10,"0",""),1:56,sep="") #Experiment 1
+#vpn <- paste("vp",ifelse(1:68<10,"0",""),1:68,sep="") #Experiment 2
+vpn <- paste("vp",ifelse(1:56<10,"0",""),1:56,sep="") #Experiment 1
 #vpn <- "vp04"
 #vpn <- "vp01"
 # Exclusions:
