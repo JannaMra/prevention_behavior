@@ -16,8 +16,8 @@ options(warn=0)
 
 #rm(list=ls())
 
-basepath <-  "C:/Users/jat41gk/Documents/Projekte/Prevention behavior/Data/EyeLink/" #"C:/Users/Public/Documents/Local/Projekte/Pupiltest/"
-savepath <- "C:/Users/jat41gk/Documents/Projekte/Prevention behavior/Data/Pupil/" #"C:/Users/Public/Documents/Local/Projekte/Pupiltest/"
+basepath <-  paste0(path,"Data/EyeLink/") #"C:/Users/jat41gk/Documents/Projekte/Prevention behavior/Data/EyeLink/" #"C:/Users/Public/Documents/Local/Projekte/Pupiltest/"
+savepath <- paste0(path,"Data/Pupil/") #"C:/Users/jat41gk/Documents/Projekte/Prevention behavior/Data/Pupil/" #"C:/Users/Public/Documents/Local/Projekte/Pupiltest/"
 
 #vpn <- c("Look002")
 
@@ -130,15 +130,15 @@ for (vp in vpn) {
       while (length(timelinenew)<((en-st)/(1000/newhz))) {
         timelinenew <- c(timelinenew,tail(timelinenew,1)+(1000/newhz))
       }
-      pdids <- interp1(pdi$x, pdi$y, timelinenew)
+      pdids <- signal::interp1(pdi$x, pdi$y, timelinenew)
 
       # Smooting?
       if (smoothing) {
         # Replicate first and last value to reduce filter artifacts
         pdidsf <- c(rep(pdids[1],100),pdids,rep(pdids[length(pdids)],100))
         pdidsf[is.na(pdidsf)] <- mean(pdidsf,na.rm=TRUE)
-        bf <- butter(2, 1/(newhz/2)*2)     # 2 Hz low-pass filter
-        pdidssmooth <- filtfilt(bf, pdidsf) # apply filter
+        bf <- signal::butter(2, 1/(newhz/2)*2)     # 2 Hz low-pass filter
+        pdidssmooth <- signal::filtfilt(bf, pdidsf) # apply filter
         pdidssmooth <- pdidssmooth[101:(length(pdidssmooth)-100)]
       } else {
         pdidssmooth <- pdids
@@ -313,15 +313,15 @@ for (vp in vpn) {
         while (length(timelinenew)<((en-st)/(1000/newhz))) {
           timelinenew <- c(timelinenew,tail(timelinenew,1)+(1000/newhz))
         }
-        pdids <- interp1(pdi$x, pdi$y, timelinenew)
+        pdids <- signal::interp1(pdi$x, pdi$y, timelinenew)
         
         # Smooting?
         if (smoothing) {
           # Replicate first and last value to reduce filter artifacts
           pdidsf <- c(rep(pdids[1],100),pdids,rep(pdids[length(pdids)],100))
           pdidsf[is.na(pdidsf)] <- mean(pdidsf,na.rm=TRUE)
-          bf <- butter(2, 1/(newhz/2)*2)     # 2 Hz low-pass filter
-          pdidssmooth <- filtfilt(bf, pdidsf) # apply filter
+          bf <- signal::butter(2, 1/(newhz/2)*2)     # 2 Hz low-pass filter
+          pdidssmooth <- signal::filtfilt(bf, pdidsf) # apply filter
           pdidssmooth <- pdidssmooth[101:(length(pdidssmooth)-100)]
         } else {
           pdidssmooth <- pdids
