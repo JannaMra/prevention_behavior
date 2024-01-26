@@ -84,7 +84,7 @@ print(pupil.plot %>% ggplot(aes(x=time, y=mmChange, color=condition, group=condi
         annotate(geom = "text",
                  label = c("Cue Onset", "~ Picture Onset"),
                              x = c(110, 230),
-                            y = c(2.8, 2.8),
+                            y = c(3.4, 3.4),
                              angle = 90,
                   vjust = 1) +
         ylab("Pupil Size Change (mm)") + xlab("Time") + labs(color="condition") +
@@ -203,7 +203,7 @@ print(pupil.plot %>% ggplot(aes(x=time, y=mmChange, color=condition, group=condi
           axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0, "pt"))))
 
 
-write.csv2(pupil_long,paste("Data/Pupil/","Pupil_long.csv",sep=""))
+write.csv2(pupil_long,paste(path,"Data/Pupil/","Pupil_long.csv",sep=""))
 
 # Analysen Isabelle
 
