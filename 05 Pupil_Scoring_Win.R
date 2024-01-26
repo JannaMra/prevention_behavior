@@ -21,17 +21,23 @@ savepath <- paste0(path,"Data/Pupil/") #"C:/Users/jat41gk/Documents/Projekte/Pre
 
 #vpn <- c("Look002")
 
-hz <- 1000
+hz <- 500
 newhz <- 100
 
 smoothing <- TRUE    # Smooth time series (2 Hz)?
 conversion <- TRUE   # Convert to mm according to Hayes & Petrov (2016)
 
 # Distance Eye - Screen Center (mm)
-distance <- 500 # to do - Check Distance!!
+distance <- 590 #Experiment 1
+#distance <- 610 #Experiment 2
 
 # Scoring-Window
 st <- -1000; en <- 4000  # Prestimulus-Baseline start and end
+
+# Onsets laden
+msg <- read.csv2(paste0(path,"Data/Eyelink/msg.csv"), row.names = 1)
+fixa <- read.csv2(paste0(path,"Data/Eyelink/fixa.csv"), row.names = 1)
+sac <- read.csv2(paste0(path,"Data/Eyelink/sacc.csv"), row.names = 1)
 
 # get VPn
 #vpn.eye = fixations$subject %>% unique() %>% setdiff(exclusions.eye.num) %>% sort()
@@ -39,16 +45,11 @@ vpn.eye = fixa$vp %>%
   unique() %>% sort() %>% as.character()
 vpn <- vpn.eye %>% setdiff(eye.invalid.bl) %>% setdiff(exclusion.responses) #vpdat$filename
 
-# Onsets laden
-msg <- read.csv2(paste0(path,"Data/Eyelink/msg.csv"), row.names = 1)
-fixa <- read.csv2(paste0(path,"Data/Eyelink/fixa.csv"), row.names = 1)
-sac <- read.csv2(paste0(path,"Data/Eyelink/sacc.csv"), row.names = 1)
-
 ga <- numeric()
 
 # Loop over subjects
 for (vp in vpn) {
-  #vp <- 54
+  #vp <- "vp69"
   code <- vp
   print(code)
   prot_all <- data.frame()
