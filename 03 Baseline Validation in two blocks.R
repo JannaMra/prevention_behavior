@@ -18,8 +18,8 @@ plotBL1 <- TRUE
 plotBL2 <- TRUE
 
 # Load fixation list
-fixa <- read.table(paste(path,"Data/Eyelink/Prevention/Output/Fixations.txt", sep=""),sep = '\t', skip=1 ,dec=",",na.strings=".")
-#fixa <- read.table(paste(path,"Data/Eyelink/Prevention_Follow_up/Output/Fixations.txt", sep=""),sep = '\t', skip=1 ,dec=",",na.strings=".")
+#fixa <- read.table(paste(path,"Data/Eyelink/Prevention/Output/Fixations.txt", sep=""),sep = '\t', skip=1 ,dec=",",na.strings=".")
+fixa <- read.table(paste(path,"Data/Eyelink/Prevention_Follow_up/Output/Fixations.txt", sep=""),sep = '\t', skip=1 ,dec=",",na.strings=".")
 names(fixa) <- c("vp","trial","timest","timeend","x","y")
 # have trials as numeric from 1:90 
 fixa$trial <- as.numeric(sub("Trial: ", "", fixa$trial))
@@ -34,8 +34,8 @@ fixablock <- fixa %>% mutate(block = case_when(
   trial>100  ~ 2))
 
 # Load saccade list
-sacc <- read.table(paste(path,"Data/Eyelink/Prevention/Output/Saccades.txt", sep=""),sep = '\t', skip=1 ,dec=",",na.strings=".")
-#sacc <- read.table(paste(path,"Data/Eyelink/Prevention_Follow_up/Output/Saccades.txt", sep=""),sep = '\t', skip=1 ,dec=",",na.strings=".")
+#sacc <- read.table(paste(path,"Data/Eyelink/Prevention/Output/Saccades.txt", sep=""),sep = '\t', skip=1 ,dec=",",na.strings=".") #Experiment 1
+sacc <- read.table(paste(path,"Data/Eyelink/Prevention_Follow_up/Output/Saccades.txt", sep=""),sep = '\t', skip=1 ,dec=",",na.strings=".") #Experiment 2
 names(sacc) <- c("vp","trial","blink","timest", "timeend","xst","yst", "xend", "yend")
 # have trials as numeric from 1:90 
 sacc$trial <- as.numeric(sub("Trial: ", "", sacc$trial))
@@ -47,10 +47,10 @@ sacc$vp <- sub("_2", "",sacc$vp)
 write.csv2(sacc, paste0(path,"Data/Eyelink/sacc.csv"))
 
 # Get onsets
-msg <- read.table(paste(path,"Data/Eyelink/Prevention/Output/Messages.txt",sep=""),sep = '\t', skip = 1, dec=".", na.strings=".", 
-                  colClasses=c("character","character","numeric", "character"))
-#msg <- read.table(paste(path,"Data/Eyelink/Prevention_Follow_up/Output/Messages.txt",sep=""),sep = '\t', skip = 1, dec=".", na.strings=".", 
+#msg <- read.table(paste(path,"Data/Eyelink/Prevention/Output/Messages.txt",sep=""),sep = '\t', skip = 1, dec=".", na.strings=".", 
                   #colClasses=c("character","character","numeric", "character"))
+msg <- read.table(paste(path,"Data/Eyelink/Prevention_Follow_up/Output/Messages.txt",sep=""),sep = '\t', skip = 1, dec=".", na.strings=".", 
+                  colClasses=c("character","character","numeric", "character"))
 names(msg) <- c("vp","trial","time", "event")
 msg$trial <- as.numeric(sub("Trial: ", "", msg$trial))
 msg$trial <- ifelse(grepl("_2",msg$vp), 
