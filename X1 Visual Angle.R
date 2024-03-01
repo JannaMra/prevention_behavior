@@ -3,7 +3,7 @@
 
 #rm(list=ls())
 
-# Screen dimensions: LG 24MB65PY-B
+# Screen dimensions: LG 24MB65PY-B Würzburg 
 # Pixel size
 wx <- 1920; wy <- 1200
 # Screen size (in cm)
