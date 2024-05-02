@@ -58,7 +58,7 @@ pupil_long$time <- as.numeric(pupil_long$time)
 Baselines <- pupil_long %>%
   group_by(vp, trial)%>%
   dplyr::filter(time <= 100)%>%
-  dplyr::filter(time > 50)%>%
+  dplyr::filter(time > 0)%>%
   summarise(
     Baseline = mean(mmChange, na.rm = TRUE)
   )
@@ -174,6 +174,7 @@ print(pupil.plot %>% ggplot(aes(x=time, y=mmChange, color=condition, group=condi
         #geom_point() + geom_path(data=pupil.ga.gen %>% dplyr::filter(threat %in% c("CS-", "CS+")), color = "black", size=1.5) + #generalization line (geom_point first for order of x-axis)
         geom_line(linewidth=1) + #geom_point(size=4.5) + 
         geom_ribbon(aes(ymin=mmChange-mmChange.se, ymax=mmChange+mmChange.se, color=condition), color = NA, alpha=.1) + 
+        #scale_color_manual(values = c("#6BBFA3", "#007AC3")) +
         scale_colour_viridis_d() +
         geom_line(aes(x = 0), color = "black") +
         #geom_line(aes(x = 220), linetype = "dashed", color = "black") +
@@ -184,24 +185,25 @@ print(pupil.plot %>% ggplot(aes(x=time, y=mmChange, color=condition, group=condi
                  angle = 90,
                  vjust = 1) +
         ylab("Pupil Size Change (mm)") + xlab("Time") + labs(color="condition") +
-        theme_bw() + theme(
-          #aspect.ratio = 1,
-          legend.position = "right",
-          panel.background = element_rect(fill="white", color="white"),
-          legend.background = element_rect(fill="white", color="grey"),
-          legend.key=element_rect(fill='white'),
-          legend.text = element_text(size=14, color="black"),
-          legend.title = element_text(size=14, color="black"),
-          axis.text = element_text(color="black"),
-          axis.text.x = element_text(size=16, color="black"),
-          axis.text.y = element_text(size=16, color="black"),
-          strip.text.x = element_text(size=12, color="black"),
-          axis.ticks.x = element_line(color="black"),
-          axis.line.x = element_line(color="black"),
-          axis.line.y = element_line(color="black"),
-          axis.title = element_text(size=16, color="black"),
-          axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0, "pt"))))
-
+        theme_classic())
+      
+        # theme_bw() + theme(
+        #   #aspect.ratio = 1,
+        #   legend.position = "right",
+        #   panel.background = element_rect(fill="white", color="white"),
+        #   legend.background = element_rect(fill="white", color="grey"),
+        #   legend.key=element_rect(fill='white'),
+        #   legend.text = element_text(size=14, color="black"),
+        #   legend.title = element_text(size=14, color="black"),
+        #   axis.text = element_text(color="black"),
+        #   axis.text.x = element_text(size=16, color="black"),
+        #   axis.text.y = element_text(size=16, color="black"),
+        #   strip.text.x = element_text(size=12, color="black"),
+        #   axis.ticks.x = element_line(color="black"),
+        #   axis.line.x = element_line(color="black"),
+        #   axis.line.y = element_line(color="black"),
+        #   axis.title = element_text(size=16, color="black"),
+        #   axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0, "pt"))))
 
 write.csv2(pupil_long,paste(path,"Data/Pupil/","Pupil_long.csv",sep=""))
 
@@ -214,6 +216,27 @@ pupil_long_test <- pupil_long %>%
     Anticipation = mean(mmChange, na.rm = TRUE)
   )
 
-ez::ezANOVA(data = pupil_long_test, dv = Anticipation, wid = vp, within = c(OpPrev, ActPass), detailed = TRUE) %>% schoRsch::anova_out()
+means_pupil_test <- pupil_long %>%
+  group_by(ActPass, OpPrev)%>%
+  dplyr::filter(time >= -600)%>%
+  summarise(
+    Anticipation = mean(mmChange, na.rm = TRUE)
+  )
+
+means_pupil_test_actpass <- pupil_long %>%
+  group_by(ActPass)%>%
+  dplyr::filter(time >= -600)%>%
+  summarise(
+    Anticipation = mean(mmChange, na.rm = TRUE)
+  )
+
+means_pupil_test_opprev <- pupil_long %>%
+  group_by(OpPrev)%>%
+  dplyr::filter(time >= -600)%>%
+  summarise(
+    Anticipation = mean(mmChange, na.rm = TRUE)
+  )
+
+ez::ezANOVA(data = pupil_long_test, dv = Anticipation, wid = vp, within = c(OpPrev, ActPass), detailed = TRUE) %>% schoRsch::anova_out() 
 t.test(Anticipation ~ OpPrev, data= (pupil_long_test %>% dplyr::filter((OpPrev == "prevent" & ActPass == "passive")|(OpPrev == "operant" & ActPass == "passive"))), paired = T) %>% schoRsch::t_out()
 t.test(Anticipation ~ OpPrev, data= (pupil_long_test %>% dplyr::filter((OpPrev == "prevent" & ActPass == "active")|(OpPrev == "operant" & ActPass == "active"))), paired = T) %>% schoRsch::t_out()

@@ -258,7 +258,7 @@ for (vpn in vps) {
   prot$blmeany <- meany
 
   prot <- prot %>%
-    mutate(blok2 = case_when(abs(blmeanx - blx) > 50 | abs(blmeany - bly) > 50 ~ 0, #outlier because more than 150 pixels from mean
+    mutate(blok2 = case_when(abs(blmeanx - blx) > 50 | abs(blmeany - bly) > 50 ~ 0, #outlier because more than 100 pixels from mean
                              abs(blmeanx - blx) < 50 & abs(blmeany - bly) < 50 ~ 1
     )
     )
@@ -314,3 +314,51 @@ write.csv2(erg,paste(path.prot,"Results_BaselineCheck_blockwise.csv",sep=""),row
 # Define cases with too many outliers (>50%) to exclude from further analyses
 eye.invalid.bl <- erg %>% filter(prob == 1) %>% pull(vp) %>% unique()
 
+# Write out Accuracy results----------------------------------------------------
+
+eye.accuracy.check = tibble()
+for (file in list.files(paste0(path, "Data/EyeLink/"), pattern="*.edf", full.names = T)) {
+  calibration.temp <- file %>% eyelinkReader::read_edf(import_samples=F)
+  eye.accuracy.check <- calibration.temp$events %>% tibble() %>% 
+    mutate(index = 1:n()) %>% 
+    select(index, message) %>% 
+    filter(message %>% grepl("VALIDATION", .)) %>% 
+    filter(!grepl("ABORTED", message)) %>% 
+    summarise(subject = file %>% pathToCode(),
+              validations = n()) %>% 
+    bind_rows(eye.accuracy.check, .)
+}
+eye.accuracy.check %>% filter(validations > 1) #more than 1 validation performed
+
+#Accuracy
+eye.accuracy = tibble()
+for (file in list.files(paste0(path, "Data/EyeLink/"), pattern="*.edf", full.names = T)) {
+  #file = list.files(paste0(path.eye, "../"), pattern="*.edf", full.names = T) #%>% sample(1)
+  calibration.temp <- file %>% eyelinkReader::read_edf(import_samples=F) 
+  eye.accuracy = calibration.temp$events %>% tibble() %>% 
+    mutate(index = 1:n()) %>% 
+    select(index, message) %>% 
+    filter(message %>% grepl("VALIDATION", .)) %>% 
+    filter(!grepl("ABORTED", message)) %>% 
+    mutate(lag = lead(index) - index, lag = ifelse(is.na(lag), index, lag)) %>% #find the last instances before a big lag (and also take very last instance)
+    arrange(lag) %>% 
+    filter(index < 1000) %>%
+    tail(1) %>% arrange(index) %>% 
+    mutate(message = message %>% trimws()) %>% 
+    separate(message, into= c(NA, NA, NA, NA, NA, NA, NA,"average", NA, "max", NA, NA, NA, NA, NA, NA), sep = "[\\s]+") %>% 
+    mutate(subject = file %>% pathToCode()) %>% 
+    #pivot_wider(id_cols = subject, names_prefix = "validation", names_from = block, values_from = val3) %>% #wide format
+    mutate(validation = average %>% as.double()) %>% select(subject, validation) %>% #long format
+    bind_rows(eye.accuracy, .)
+}
+eye.accuracy <- eye.accuracy %>% mutate(block = case_when(grepl("_1", eye.accuracy$subject) ~ 1,
+                                                          grepl("_2", eye.accuracy$subject) ~ 2))
+
+eye.accuracy %>% summarise(inaccuracy.m = mean(validation), inaccuracy.sd = sd(validation))
+
+eye.accuracy %>% 
+  mutate(subject = gsub("_1","",subject))%>%
+  mutate(subject = gsub("_2","",subject))%>%
+  filter(! subject %in% eye.invalid.bl)%>%
+  filter(! subject %in% exclusion.responses)%>%
+  summarise(inaccuracy.m = mean(validation), inaccuracy.sd = sd(validation))
