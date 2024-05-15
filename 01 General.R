@@ -45,8 +45,8 @@ library(tidyverse)
 
 # Paths -------------------------------------------------------------------
 path = #getwd() %>% paste0("/")
-  #"C:/Users/jat41gk/Documents/Projekte/Prevention behavior/Experiment 1/" #path Experiment 1 Janna
-  "C:/Users/jat41gk/Documents/Projekte/Prevention behavior/Experiment 2/" #path Experiment 2 Janna
+  "C:/Users/jat41gk/Documents/Projekte/Prevention behavior/Experiment 1/" #path Experiment 1 Janna
+  #"C:/Users/jat41gk/Documents/Projekte/Prevention behavior/Experiment 2/" #path Experiment 2 Janna
 
 { # Functions ---------------------------------------------------------------
   se = function(x, na.rm = FALSE) {
