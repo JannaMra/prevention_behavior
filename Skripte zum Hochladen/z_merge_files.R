@@ -21,8 +21,8 @@ merge_files <- function(files, ...) {
     if (exists("dataset")) {
       temp_dataset <-  data.table::fread(file, ...)
       temp_dataset$fileName <- paste(file, sep = "")
-      temp_dataset$path <- paste(getwd(), sep = "")
-      #dataset <- rbind(dataset, temp_dataset, use.names = FALSE)
+      #temp_dataset$path <- paste(getwd(), sep = "")
+      dataset <- rbind(dataset, temp_dataset, use.names = FALSE)
       rm(temp_dataset)
     }
     if (!exists("dataset")) {
